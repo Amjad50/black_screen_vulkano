@@ -276,43 +276,6 @@ fn main() {
 
     let mut previous_frame_end = Some(sync::now(device.clone()).boxed());
 
-    let mut builder = AutoCommandBufferBuilder::primary(
-        &command_buffer_allocator,
-        queue.queue_family_index(),
-        CommandBufferUsage::OneTimeSubmit,
-    )
-    .unwrap();
-
-    builder
-        .begin_render_pass(
-            RenderPassBeginInfo {
-                clear_values: vec![Some([0.0, 1.0, 1.0, 1.0].into())],
-                ..RenderPassBeginInfo::framebuffer(framebuffer.clone())
-            },
-            SubpassContents::Inline,
-        )
-        .unwrap()
-        .set_viewport(0, [viewport.clone()])
-        .bind_pipeline_graphics(pipeline.clone())
-        .bind_vertex_buffers(0, vertex_buffer.clone())
-        .draw(vertex_buffer.len() as u32, 1, 0, 0)
-        .unwrap()
-        .end_render_pass()
-        .unwrap();
-
-    let command_buffer = builder.build().unwrap();
-
-    let future = previous_frame_end
-        .take()
-        .unwrap()
-        .then_execute(queue.clone(), command_buffer)
-        .unwrap()
-        .boxed();
-
-    future.then_signal_fence().wait(None).unwrap();
-
-    previous_frame_end = Some(sync::now(device.clone()).boxed());
-
     event_loop.run(move |event, _, control_flow| match event {
         Event::WindowEvent {
             event: WindowEvent::CloseRequested,
@@ -327,7 +290,6 @@ fn main() {
             recreate_swapchain = true;
         }
         Event::RedrawEventsCleared => {
-            println!("loop start");
             let window = surface.object().unwrap().downcast_ref::<Window>().unwrap();
             let dimensions = window.inner_size();
             if dimensions.width == 0 || dimensions.height == 0 {
@@ -372,6 +334,23 @@ fn main() {
             .unwrap();
 
             builder
+                .begin_render_pass(
+                    RenderPassBeginInfo {
+                        clear_values: vec![Some([0.0, 1.0, 1.0, 1.0].into())],
+                        ..RenderPassBeginInfo::framebuffer(framebuffer.clone())
+                    },
+                    SubpassContents::Inline,
+                )
+                .unwrap()
+                .set_viewport(0, [viewport.clone()])
+                .bind_pipeline_graphics(pipeline.clone())
+                .bind_vertex_buffers(0, vertex_buffer.clone())
+                .draw(vertex_buffer.len() as u32, 1, 0, 0)
+                .unwrap()
+                .end_render_pass()
+                .unwrap();
+
+            builder
                 .blit_image(BlitImageInfo::images(
                     render_image.clone(),
                     images[image_index as usize].clone(),
@@ -404,7 +383,6 @@ fn main() {
                     panic!("Failed to flush future: {e:?}");
                 }
             }
-            println!("loop end");
         }
         _ => (),
     });

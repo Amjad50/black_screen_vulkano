@@ -1179,7 +1179,17 @@ dependencies = [
  "smallvec",
  "thread_local",
  "vk-parse",
- "vulkano_macros",
+ "vulkano-macros",
+]
+
+[[package]]
+name = "vulkano-macros"
+version = "0.32.0"
+dependencies = [
+ "proc-macro-crate",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -1204,16 +1214,6 @@ dependencies = [
  "raw-window-handle 0.5.0",
  "vulkano",
  "winit",
-]
-
-[[package]]
-name = "vulkano_macros"
-version = "0.32.0"
-dependencies = [
- "proc-macro-crate",
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
